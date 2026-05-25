@@ -164,41 +164,8 @@ export const { use: useHighlights, provider: HighlightsProvider } = createSimple
       setStore("version", platform.version)
     }
 
-    const start = (previous: string) => {
-      if (!settings.general.releaseNotes()) {
-        markSeen()
-        return
-      }
-
-      const fetcher = platform.fetch ?? fetch
-      const controller = new AbortController()
-      onCleanup(() => {
-        controller.abort()
-        clearTimer()
-      })
-
-      fetcher(CHANGELOG_URL, {
-        signal: controller.signal,
-        headers: { Accept: "application/json" },
-      })
-        .then((response) => (response.ok ? (response.json() as Promise<unknown>) : undefined))
-        .then((json) => {
-          if (!json) return
-          const highlights = loadReleaseHighlights(json, platform.version, previous)
-          if (controller.signal.aborted) return
-
-          if (highlights.length === 0) {
-            markSeen()
-            return
-          }
-
-          timer = setTimeout(() => {
-            timer = undefined
-            markSeen()
-            dialog.show(() => <DialogReleaseNotes highlights={highlights} />)
-          }, 500)
-        })
-        .catch(() => undefined)
+    const start = (_previous: string) => {
+      markSeen()
     }
 
     createEffect(() => {
