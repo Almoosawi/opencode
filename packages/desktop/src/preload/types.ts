@@ -16,9 +16,7 @@ export type LinuxDisplayBackend = "wayland" | "auto"
 export type TitlebarTheme = {
   mode: "light" | "dark"
 }
-export type WindowConfig = {
-  updaterEnabled: boolean
-}
+export type WindowConfig = Record<string, never>
 
 export type FatalRendererError = {
   error: string
@@ -86,9 +84,6 @@ export type ElectronAPI = {
   setTitlebar: (theme: TitlebarTheme) => Promise<void>
   runDesktopMenuAction: (action: DesktopMenuAction) => Promise<void>
   loadingWindowComplete: () => void
-  runUpdater: (alertOnFail: boolean) => Promise<void>
-  checkUpdate: () => Promise<{ updateAvailable: boolean; version?: string }>
-  installUpdate: () => Promise<void>
   setBackgroundColor: (color: string) => Promise<void>
   exportDebugLogs: () => Promise<string>
   recordFatalRendererError: (error: FatalRendererError) => Promise<void>

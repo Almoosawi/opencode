@@ -224,8 +224,6 @@ export const ErrorPage: Component<ErrorPageProps> = (props) => {
   const formattedError = () => formatError(props.error, language.t)
   let recordedFatalError: Promise<void> | undefined
   const [store, setStore] = createStore({
-    checking: false,
-    version: undefined as string | undefined,
     actionError: undefined as string | undefined,
   })
 
@@ -244,33 +242,6 @@ export const ErrorPage: Component<ErrorPageProps> = (props) => {
   onMount(() => {
     void ensureFatalErrorRecorded().catch(() => undefined)
   })
-
-  async function checkForUpdates() {
-    if (!platform.checkUpdate) return
-    setStore("checking", true)
-    await platform
-      .checkUpdate()
-      .then((result) => {
-        setStore("actionError", undefined)
-        if (result.updateAvailable && result.version) setStore("version", result.version)
-      })
-      .catch((err) => {
-        setStore("actionError", formatError(err, language.t))
-      })
-      .finally(() => {
-        setStore("checking", false)
-      })
-  }
-
-  async function installUpdate() {
-    if (!platform.updateAndRestart) return
-    await platform
-      .updateAndRestart()
-      .then(() => setStore("actionError", undefined))
-      .catch((err) => {
-        setStore("actionError", formatError(err, language.t))
-      })
-  }
 
   async function exportDebugLogs() {
     const exportLogs = platform.exportDebugLogs
@@ -325,22 +296,6 @@ export const ErrorPage: Component<ErrorPageProps> = (props) => {
                 </Button>
               )
             }}
-          </Show>
-          <Show when={platform.checkUpdate}>
-            <Show
-              when={store.version}
-              fallback={
-                <Button size="large" variant="ghost" onClick={checkForUpdates} disabled={store.checking}>
-                  {store.checking
-                    ? language.t("error.page.action.checking")
-                    : language.t("error.page.action.checkUpdates")}
-                </Button>
-              }
-            >
-              <Button size="large" onClick={installUpdate}>
-                {language.t("error.page.action.updateTo", { version: store.version ?? "" })}
-              </Button>
-            </Show>
           </Show>
         </div>
         <Show when={store.actionError}>

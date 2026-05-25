@@ -13,7 +13,7 @@ import contextMenu from "electron-context-menu"
 
 import type { InitStep, ServerReadyData, SqliteMigrationProgress, WslConfig } from "../preload/types"
 import { checkAppExists, resolveAppPath, wslPath } from "./apps"
-import { CHANNEL, UPDATER_ENABLED } from "./constants"
+import { CHANNEL } from "./constants"
 import { registerIpcHandlers, sendDeepLinks, sendMenuCommand, sendSqliteMigrationProgress } from "./ipc"
 import { exportDebugLogs, initCrashReporter, initLogging, startNetLog, write as writeLog } from "./logging"
 import { parseMarkdown } from "./markdown"
@@ -36,7 +36,6 @@ import {
   setDockIcon,
 } from "./windows"
 import { migrate } from "./migrate"
-import { checkUpdate, checkForUpdates, installUpdate, setupAutoUpdater } from "./updater"
 import { Deferred, Effect, Fiber } from "effect"
 
 const APP_NAMES: Record<string, string> = {
@@ -239,7 +238,7 @@ const main = Effect.gen(function* () {
       },
       (e) => Effect.runPromise(e),
     ),
-    getWindowConfig: () => ({ updaterEnabled: UPDATER_ENABLED }),
+    getWindowConfig: () => ({}),
     consumeInitialDeepLinks: () => pendingDeepLinks.splice(0),
     getDefaultServerUrl: () => getDefaultServerUrl(),
     setDefaultServerUrl: (url) => setDefaultServerUrl(url),
@@ -252,9 +251,6 @@ const main = Effect.gen(function* () {
     wslPath: async (path, mode) => wslPath(path, mode),
     resolveAppPath: async (appName) => resolveAppPath(appName),
     loadingWindowComplete: () => Deferred.doneUnsafe(loadingComplete, Effect.void),
-    runUpdater: async (alertOnFail) => checkForUpdates(alertOnFail, killSidecar),
-    checkUpdate: async () => checkUpdate(),
-    installUpdate: async () => installUpdate(killSidecar),
     setBackgroundColor: (color) => setBackgroundColor(color),
     exportDebugLogs: () => exportDebugLogs(),
     recordFatalRendererError: (error) => writeLog("renderer", "fatal renderer error", { ...error }, "error"),
@@ -266,7 +262,6 @@ const main = Effect.gen(function* () {
   app.setAsDefaultProtocolClient("opencode")
   registerRendererProtocol()
   setDockIcon()
-  setupAutoUpdater()
   yield* Effect.promise(() => startNetLog()).pipe(
     Effect.catch((error) =>
       Effect.sync(() => {
@@ -377,9 +372,6 @@ const main = Effect.gen(function* () {
       trigger: (id) => {
         const win = BrowserWindow.getFocusedWindow() ?? mainWindow
         if (win) sendMenuCommand(win, id)
-      },
-      checkForUpdates: () => {
-        void checkForUpdates(true, killSidecar)
       },
       relaunch: () => {
         void killSidecar().finally(() => {

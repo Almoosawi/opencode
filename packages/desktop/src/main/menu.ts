@@ -7,12 +7,10 @@ import {
   type DesktopMenuRole,
 } from "@opencode-ai/app/desktop-menu"
 
-import { UPDATER_ENABLED } from "./constants"
 import { runDesktopMenuAction } from "./desktop-menu-actions"
 
 type Deps = {
   trigger: (id: string) => void
-  checkForUpdates: () => void
   relaunch: () => void
 }
 
@@ -39,7 +37,7 @@ function nativeItem(entry: DesktopMenuEntry, deps: Deps): MenuItemConstructorOpt
   const item: MenuItemConstructorOptions = {
     label: entry.label,
     accelerator: entry.accelerator?.macos,
-    enabled: entry.enabled === "updater" ? UPDATER_ENABLED : undefined,
+    enabled: entry.enabled === "updater" ? false : undefined,
   }
 
   if (entry.command) {
@@ -50,7 +48,6 @@ function nativeItem(entry: DesktopMenuEntry, deps: Deps): MenuItemConstructorOpt
     const action = entry.action
     item.click = () =>
       runDesktopMenuAction(BrowserWindow.getFocusedWindow(), action, {
-        checkForUpdates: deps.checkForUpdates,
         relaunch: deps.relaunch,
       })
   }
