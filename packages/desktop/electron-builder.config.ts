@@ -1,23 +1,14 @@
-import { execFile } from "node:child_process"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
-import { promisify } from "node:util"
-
 import type { Configuration } from "electron-builder"
 
-const execFileAsync = promisify(execFile)
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
-const signScript = path.join(rootDir, "script", "sign-windows.ps1")
-
 async function signWindows(configuration: { path: string }) {
-  if (process.platform !== "win32") return
-  if (process.env.GITHUB_ACTIONS !== "true") return
-
-  await execFileAsync(
-    "pwsh",
-    ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", signScript, configuration.path],
-    { cwd: rootDir },
-  )
+  if (process.env.OPENCODE_SIGN_BUILD !== "true") {
+    console.log("Skipping code signing (OPENCODE_SIGN_BUILD not set)")
+    return
+  }
+  const { execSync } = require("child_process")
+  execSync(`signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "${configuration.path}"`, {
+    stdio: "inherit",
+  })
 }
 
 const channel = (() => {
