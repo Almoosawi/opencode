@@ -205,16 +205,10 @@ const createPlatform = (): Platform => {
     storage,
 
     checkUpdate: async () => {
-      const config = await window.api.getWindowConfig().catch(() => ({ updaterEnabled: false }))
-      if (!config.updaterEnabled) return { updateAvailable: false }
-      return window.api.checkUpdate()
+      return { updateAvailable: false }
     },
 
-    updateAndRestart: async () => {
-      const config = await window.api.getWindowConfig().catch(() => ({ updaterEnabled: false }))
-      if (!config.updaterEnabled) return
-      await window.api.installUpdate()
-    },
+    updateAndRestart: async () => {},
 
     exportDebugLogs: () => window.api.exportDebugLogs(),
 
