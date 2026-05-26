@@ -15,4 +15,5 @@ RUN apt-get update \
     unzip \
     xz-utils \
     zip \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && groupadd -r builder && useradd -r -g builder -m builder

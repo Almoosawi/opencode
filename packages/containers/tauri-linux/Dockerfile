@@ -3,6 +3,7 @@ FROM ${REGISTRY}/build/rust:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+USER root
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     libappindicator3-dev \
@@ -10,3 +11,5 @@ RUN apt-get update \
     librsvg2-dev \
     patchelf \
   && rm -rf /var/lib/apt/lists/*
+
+USER builder

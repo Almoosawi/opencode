@@ -22,3 +22,5 @@ RUN set -euo pipefail; \
   bun --version; \
   node --version; \
   npm --version
+
+USER builder
